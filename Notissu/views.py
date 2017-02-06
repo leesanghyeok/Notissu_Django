@@ -27,7 +27,7 @@ def get_list(request, category, page):
     for key, value in CATEGORY_LIST.iteritems():
         if category == key:
             is_contain = 1
-            continue
+            break
     if is_contain == 0:
         return wrong_request()
 
@@ -35,7 +35,12 @@ def get_list(request, category, page):
     start_index = (page - 1) * RETURN_COUNT
     end_index = start_index + RETURN_COUNT
 
-    db_notice_list = Notice.objects.filter(category=CATEGORY_LIST[category]).order_by('-date')[
+    if category == 'all':
+        db_notice_list = Notice.objects.all()
+    else:
+        db_notice_list = Notice.objects.filter(category=CATEGORY_LIST[category])
+
+    db_notice_list = db_notice_list.order_by('-date')[
                      start_index:end_index].values()
     if db_notice_list.count() <= 0:
         return wrong_request()
