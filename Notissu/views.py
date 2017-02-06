@@ -4,6 +4,7 @@ import json
 from django.http import HttpResponse
 
 from Notissu.models import Notice
+from Notissu.models import NoticeFiles
 
 RETURN_COUNT = 7
 
@@ -20,6 +21,7 @@ CATEGORY_LIST = {
 }
 
 
+# all에 대한 처리를 아직 안했다.
 def get_list(request, category, page):
     is_contain = 0
     for key, value in CATEGORY_LIST.iteritems():
@@ -50,7 +52,26 @@ def get_list(request, category, page):
 
 
 def get_view(request, notice_id):
-    return HttpResponse("view " + notice_id, content_type='application/json')
+    notice = Notice.objects.filter(id=notice_id).values()
+    if notice.count() <= 0:
+        return wrong_request()
+
+    notice = notice[0]
+    del notice['category']
+    del notice['id']
+
+    db_notice_files_list = NoticeFiles.objects.filter(notice_id=notice_id).values()
+
+    attached_file_list = []
+    for dict in db_notice_files_list:
+        del dict['id']
+        del dict['notice_id']
+        attached_file_list.append(dict)
+
+    notice.update({'attached_files': attached_file_list})
+    return_json = json.dumps(notice, ensure_ascii=False)
+
+    return HttpResponse(return_json, content_type='application/json')
 
 
 def wrong_request():
