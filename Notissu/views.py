@@ -57,13 +57,11 @@ def get_list(request, category, page):
 
 
 def get_view(request, notice_id):
-    notice = Notice.objects.filter(id=notice_id).values()
+    notice = Notice.objects.filter(notice_id=notice_id).values()
     if notice.count() <= 0:
         return wrong_request()
 
     notice = notice[0]
-    del notice['category']
-    del notice['id']
 
     db_notice_files_list = NoticeFiles.objects.filter(notice_id=notice_id).values()
 
@@ -74,6 +72,10 @@ def get_view(request, notice_id):
         attached_file_list.append(dict)
 
     notice.update({'attached_files': attached_file_list})
+    notice.update({'notice_id': notice['id']})
+    del notice['category']
+    del notice['id']
+
     return_json = json.dumps(notice, ensure_ascii=False)
 
     return HttpResponse(return_json, content_type='application/json')
