@@ -18,10 +18,10 @@ CATEGORY_LIST = {
     'inner': '교내행사',
     'outer': '교외행사',
     'volunteer': '봉사',
+    'library': '도서관',
 }
 
 
-# all에 대한 처리를 아직 안했다.
 def get_list(request, category, page):
     is_contain = 0
     for key, value in CATEGORY_LIST.iteritems():
