@@ -51,4 +51,4 @@ settings.py
 ;;directories to ignore
 .idea/
 
-celerybeat-schedule
+celerybeat*
