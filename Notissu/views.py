@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from Notissu.models import Notice
 from Notissu.models import NoticeFiles
 
-RETURN_COUNT = 7
+RETURN_COUNT = 15
 
 CATEGORY_LIST = {
     'all': '전체',
