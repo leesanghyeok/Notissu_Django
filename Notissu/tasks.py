@@ -16,8 +16,8 @@ LIBRARY_VIEW_URL = "https://oasis.ssu.ac.kr/bbs/Detail.ax?bbsID=1&articleID=%s"
 @shared_task
 def crawling_push():
     # keyword_list = get_keyword()
-    category = ['도서관']  # , '학사', '장학', '국제교류', '외국인유학생', '모집·채용', '교내행사', '교외행사', '봉사']
-    notice_list = fetch_notice(category, 1, 1)
+    category = ['도서관', '학사', '장학', '국제교류', '외국인유학생', '모집·채용', '교내행사', '교외행사', '봉사']
+    notice_list = fetch_notice(category, 1, 50)
     unduplicated_list = check_duplicate(notice_list)
 
     insert_notice(unduplicated_list)
