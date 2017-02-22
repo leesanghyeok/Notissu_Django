@@ -19,14 +19,3 @@ class NoticeFiles(models.Model):
     notice_id = models.IntegerField()
     title = models.CharField(max_length=100)
     url = models.CharField(max_length=500)
-
-
-class User(models.Model):
-    id = models.AutoField(primary_key=True)
-    token = models.CharField(max_length=200)
-
-
-class Keyword(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
-    keyword = models.CharField(max_length=100)

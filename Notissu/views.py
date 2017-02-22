@@ -2,12 +2,9 @@
 import json
 
 from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
 
-from Notissu.models import Keyword
 from Notissu.models import Notice
 from Notissu.models import NoticeFiles
-from Notissu.models import User
 
 RETURN_COUNT = 15
 
@@ -54,7 +51,9 @@ def get_list(request, category, page):
         del dict['category']
         return_list.append(dict)
 
-    return response_json(return_list)
+    return_list_json = json.dumps(return_list, ensure_ascii=False)
+
+    return HttpResponse(return_list_json, content_type='application/json')
 
 
 def get_view(request, notice_id):
@@ -77,95 +76,9 @@ def get_view(request, notice_id):
     del notice['category']
     del notice['id']
 
-    return response_json(notice)
+    return_json = json.dumps(notice, ensure_ascii=False)
 
-
-@csrf_exempt
-def keyword(request):
-    if request.method == 'GET':
-        db_keyword_list = Keyword.objects.all().values()
-        return_list = []
-        for dict in db_keyword_list:
-            del dict['user_id']
-            del dict['id']
-            return_list.append(dict)
-        return response_json(return_list)
-    elif request.method == 'POST':
-        if not ('keyword' and 'token' in request.POST):
-            return wrong_request()
-        keyword = request.POST['keyword']
-        token = request.POST['token']
-
-        has_token = User.objects.filter(token=token).first()
-
-        if has_token:
-            has_keyword = Keyword.objects.filter(keyword=keyword).first()
-            if not has_keyword:
-                insert_keyword = Keyword(user_id=has_token.id, keyword=keyword)
-                insert_keyword.save()
-                return response_add()
-
-    return response_fail()
-
-
-@csrf_exempt
-def delete_keyword(request, keyword):
-    if request.method == 'DELETE':
-        print keyword
-        has_keyword = Keyword.objects.filter(keyword=keyword).first()
-        if has_keyword:
-            has_keyword.delete()
-            return response_delete()
-
-    return response_fail()
-
-
-@csrf_exempt
-def set_token(request):
-    if request.method == 'POST':
-        if not ('token' in request.POST):
-            return response_fail()
-        token = request.POST['token']
-        has_token = User.objects.filter(token=token).first()
-        if not has_token:
-            insert_token = User(token=token)
-            insert_token.save()
-            return response_add()
-
-    return response_fail()
-
-
-@csrf_exempt
-def delete_token(request, token):
-    if request.method == 'DELETE':
-        print token
-        has_token = User.objects.filter(token=token).first()
-        if has_token:
-            has_token.delete()
-            return response_delete()
-    return response_fail()
-
-
-def response_json(dict):
-    return_json = json.dumps(dict, ensure_ascii=False)
     return HttpResponse(return_json, content_type='application/json')
-
-
-def response_add():
-    return response_crud("ADD")
-
-
-def response_fail():
-    return response_crud("FAIL")
-
-
-def response_delete():
-    return response_crud("DELETE")
-
-
-def response_crud(message):
-    return_value_json = json.dumps({"result": message}, ensure_ascii=False)
-    return HttpResponse(return_value_json, content_type='application/json')
 
 
 def wrong_request():
