@@ -81,20 +81,21 @@ def get_view(request, notice_id):
 
 
 @csrf_exempt
-def keyword(request):
+def keyword(request, token):
     if request.method == 'GET':
-        db_keyword_list = Keyword.objects.all().values()
-        return_list = []
-        for dict in db_keyword_list:
-            del dict['user_id']
-            del dict['id']
-            return_list.append(dict)
-        return response_json(return_list)
+        has_user = User.objects.filter(token=token).first()
+        if has_user:
+            db_keyword_list = Keyword.objects.filter(user_id=has_user.id).values()
+            return_list = []
+            for dict in db_keyword_list:
+                del dict['user_id']
+                del dict['id']
+                return_list.append(dict)
+            return response_json(return_list)
     elif request.method == 'POST':
-        if not ('keyword' and 'token' in request.POST):
-            return wrong_request()
+        if not ('keyword' in request.POST):
+            return response_fail()
         keyword = request.POST['keyword']
-        token = request.POST['token']
 
         has_token = User.objects.filter(token=token).first()
 
@@ -109,10 +110,10 @@ def keyword(request):
 
 
 @csrf_exempt
-def delete_keyword(request, keyword):
+def delete_keyword(request, token, keyword):
     if request.method == 'DELETE':
-        print keyword
-        has_keyword = Keyword.objects.filter(keyword=keyword).first()
+        db_user = User.objects.filter(token=token).first()
+        has_keyword = Keyword.objects.filter(user_id=db_user.id, keyword=keyword).first()
         if has_keyword:
             has_keyword.delete()
             return response_delete()
