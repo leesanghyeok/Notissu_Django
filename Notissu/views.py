@@ -105,6 +105,11 @@ def keyword(request, token):
                 insert_keyword = Keyword(user_id=has_token.id, keyword=keyword)
                 insert_keyword.save()
                 return response_add()
+    elif request.method == 'DELETE':
+        has_user = User.objects.filter(token=token).first()
+        if has_user:
+            Keyword.objects.filter(user_id=has_user.id).delete()
+            return response_delete()
 
     return response_fail()
 
@@ -132,6 +137,8 @@ def set_token(request):
             insert_token = User(token=token)
             insert_token.save()
             return response_add()
+        else:
+            return response_update()
 
     return response_fail()
 
@@ -157,6 +164,9 @@ def response_add():
 
 def response_fail():
     return response_crud("FAIL")
+
+def response_update():
+    return response_crud("UPDATE")
 
 
 def response_delete():
