@@ -93,16 +93,17 @@ def keyword(request, token):
                 return_list.append(dict)
             return response_json(return_list)
     elif request.method == 'POST':
-        if not ('keyword' in request.POST):
+        if not ('keyword' and 'hash' in request.POST):
             return response_fail()
         keyword = request.POST['keyword']
+        hash = request.POST['hash']
 
         has_token = User.objects.filter(token=token).first()
 
         if has_token:
             has_keyword = Keyword.objects.filter(user_id=has_token.id, keyword=keyword).first()
             if not has_keyword:
-                insert_keyword = Keyword(user_id=has_token.id, keyword=keyword)
+                insert_keyword = Keyword(user_id=has_token.id, keyword=keyword, hash=hash)
                 insert_keyword.save()
                 return response_add()
     elif request.method == 'DELETE':

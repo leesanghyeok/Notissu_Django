@@ -30,3 +30,4 @@ class Keyword(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     keyword = models.CharField(max_length=100)
+    hash = models.CharField(max_length=100)
