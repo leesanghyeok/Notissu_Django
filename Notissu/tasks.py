@@ -1,3 +1,5 @@
+import json
+
 import requests
 from bs4 import BeautifulSoup
 from celery import shared_task
@@ -11,6 +13,7 @@ NOTICE_LIST_URL = "http://m.ssu.ac.kr/html/themes/m/html/notice_univ_list.jsp?sC
 LIBRARY_LIST_URL = "http://oasis.ssu.ac.kr/bbs/Bbs.ax?bbsID=1&pageSize=10&page=%d"
 NOTICE_VIEW_URL = "http://m.ssu.ac.kr/html/themes/m/html/notice_univ_view.jsp?messageId=%s&sCategory=%s"
 LIBRARY_VIEW_URL = "https://oasis.ssu.ac.kr/bbs/Detail.ax?bbsID=1&articleID=%s"
+FIREBASE_MESSAGE_SEND_URL = "https://fcm.googleapis.com/fcm/send"
 
 
 @shared_task
@@ -22,7 +25,8 @@ def crawling_push():
     contain_keyword = get_contain_keyword(unduplicated_list, keyword_list)
     push_message(contain_keyword)
     # insert_notice(unduplicated_list)
-
+    for notice,files in unduplicated_list:
+        print(notice.title)
     return "ok"
 
 
@@ -30,7 +34,9 @@ def get_keyword():
     return_keyword_list = []
     db_keyword_list = Keyword.objects.all().values()
     for dict in db_keyword_list:
-        return_keyword_list.append(dict['keyword'])
+        del dict['id']
+        del dict['user_id']
+        return_keyword_list.append(dict)
 
     return return_keyword_list
 
@@ -38,21 +44,36 @@ def get_keyword():
 def get_contain_keyword(unduplicated_list, keyword_list):
     return_keyword_list = []
     for notice, files in unduplicated_list:
-        for keyword in keyword_list:
+        for keyword_dict in keyword_list:
+            keyword = keyword_dict['keyword']
             if notice.title.find(keyword) != -1:
                 is_contain = False
                 for return_keyword in return_keyword_list:
-                    if keyword == return_keyword:
+                    if keyword == return_keyword['keyword']:
                         is_contain = True
                         break
                 if not is_contain:
-                    return_keyword_list.append(keyword)
+                    return_keyword_list.append(keyword_dict)
 
     return return_keyword_list
 
 
 def push_message(contain_keyword):
-    pass
+    header = {
+        "Content-Type": "application/json",
+        "Authorization": "key=AAAAKni3MTU:APA91bFv18y_shYTMxmKi8YZ1Rc2FLm8FolnWkb6PKoO2pLleh7fM343m3gCd5BfPy-b3mzwzvUvUwfoxnrQp-D83wYHi-BwQcj2V2dJsWYO71ROmBmpjhuKAZT6fe7paLbyDPPQK1U9",
+    }
+
+    for keyword_dict in contain_keyword:
+        hash = keyword_dict['hash']
+        data = {
+            "to": "/topics/" + hash,
+            "data": {
+                "message": "구독한 공지사항이 올라왔습니다.",
+            }
+        }
+        json_data = json.dumps(data)
+        list_response = requests.post(FIREBASE_MESSAGE_SEND_URL, headers=header, data=json_data)
 
 
 def get_notice_id(tag, start_delimiter, end_delimiter):
