@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 import requests
 from bs4 import BeautifulSoup
 from celery import shared_task
 
+from Notissu.models import Keyword
 from Notissu.models import Notice
 from Notissu.models import NoticeFiles
 
@@ -15,14 +15,44 @@ LIBRARY_VIEW_URL = "https://oasis.ssu.ac.kr/bbs/Detail.ax?bbsID=1&articleID=%s"
 
 @shared_task
 def crawling_push():
-    # keyword_list = get_keyword()
-    category = ['도서관', '학사', '장학', '국제교류', '외국인유학생', '모집·채용', '교내행사', '교외행사', '봉사']
-    notice_list = fetch_notice(category, 1, 50)
+    keyword_list = get_keyword()
+    category = ['학사']  # '도서관', '학사', '장학', '국제교류', '외국인유학생', '모집·채용', '교내행사', '교외행사', '봉사']
+    notice_list = fetch_notice(category, 1, 1)
     unduplicated_list = check_duplicate(notice_list)
-
-    insert_notice(unduplicated_list)
+    contain_keyword = get_contain_keyword(unduplicated_list, keyword_list)
+    push_message(contain_keyword)
+    # insert_notice(unduplicated_list)
 
     return "ok"
+
+
+def get_keyword():
+    return_keyword_list = []
+    db_keyword_list = Keyword.objects.all().values()
+    for dict in db_keyword_list:
+        return_keyword_list.append(dict['keyword'])
+
+    return return_keyword_list
+
+
+def get_contain_keyword(unduplicated_list, keyword_list):
+    return_keyword_list = []
+    for notice, files in unduplicated_list:
+        for keyword in keyword_list:
+            if notice.title.find(keyword) != -1:
+                is_contain = False
+                for return_keyword in return_keyword_list:
+                    if keyword == return_keyword:
+                        is_contain = True
+                        break
+                if not is_contain:
+                    return_keyword_list.append(keyword)
+
+    return return_keyword_list
+
+
+def push_message(contain_keyword):
+    pass
 
 
 def get_notice_id(tag, start_delimiter, end_delimiter):
@@ -60,9 +90,9 @@ def get_file_list(soup, notice_id, tag_name, tag_class, base_url):
 
 
 def set_files_encoding(notice_id, title, url):
-    notice_id = unicode(notice_id)
-    title = unicode(title)
-    url = unicode(url)
+    # notice_id = notice_id
+    # title = unicode(title)
+    # url = unicode(url)
     return NoticeFiles(notice_id=notice_id, title=title, url=url)
 
 
@@ -103,11 +133,11 @@ def from_notice(tag, category):
 
 
 def set_notice_encoding(category, contents, date, notice_id, title):
-    notice_id = unicode(notice_id)
-    category = str(unicode(category, 'utf-8').encode('utf-8'))
-    contents = str(unicode(contents, 'utf-8').encode('utf-8'))
-    date = unicode(date)
-    title = unicode(title)
+    # notice_id = unicode(notice_id)
+    # category = str(unicode(category, 'utf-8').encode('utf-8'))
+    # contents = str(unicode(contents, 'utf-8').encode('utf-8'))
+    # date = unicode(date)
+    # title = unicode(title)
     return Notice(notice_id=notice_id, title=title, date=date, category=category, contents=contents)
 
 

@@ -100,7 +100,7 @@ def keyword(request, token):
         has_token = User.objects.filter(token=token).first()
 
         if has_token:
-            has_keyword = Keyword.objects.filter(keyword=keyword).first()
+            has_keyword = Keyword.objects.filter(user_id=has_token.id, keyword=keyword).first()
             if not has_keyword:
                 insert_keyword = Keyword(user_id=has_token.id, keyword=keyword)
                 insert_keyword.save()
@@ -139,7 +139,6 @@ def set_token(request):
 @csrf_exempt
 def delete_token(request, token):
     if request.method == 'DELETE':
-        print token
         has_token = User.objects.filter(token=token).first()
         if has_token:
             has_token.delete()
