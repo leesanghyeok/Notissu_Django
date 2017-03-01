@@ -16,6 +16,18 @@ class Notice(models.Model):
 
 class NoticeFiles(models.Model):
     id = models.AutoField(primary_key=True)
-    notice_id = models.IntegerField()
+    notice = models.ForeignKey(Notice, null=True)
     title = models.CharField(max_length=100)
     url = models.CharField(max_length=500)
+
+
+class User(models.Model):
+    id = models.AutoField(primary_key=True)
+    token = models.CharField(max_length=200)
+
+
+class Keyword(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    keyword = models.CharField(max_length=100)
+    hash = models.CharField(max_length=100)
