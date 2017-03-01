@@ -58,7 +58,7 @@ def get_list(request, category, page):
 
 
 def get_view(request, notice_id):
-    notice = Notice.objects.filter(notice_id=notice_id).values()
+    notice = Notice.objects.filter(id=notice_id).values()
     if notice.count() <= 0:
         return wrong_request()
 
