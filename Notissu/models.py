@@ -9,7 +9,7 @@ class Notice(models.Model):
     id = models.AutoField(primary_key=True)
     notice_id = models.IntegerField()
     category = models.CharField(max_length=50)
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=150)
     contents = models.TextField(blank=True, null=True)
     date = models.CharField(max_length=50)
 
@@ -17,7 +17,7 @@ class Notice(models.Model):
 class NoticeFiles(models.Model):
     id = models.AutoField(primary_key=True)
     notice = models.ForeignKey(Notice, null=True)
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=150)
     url = models.CharField(max_length=500)
 
 
@@ -29,5 +29,5 @@ class User(models.Model):
 class Keyword(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
-    keyword = models.CharField(max_length=100)
+    keyword = models.CharField(max_length=150)
     hash = models.CharField(max_length=100)
