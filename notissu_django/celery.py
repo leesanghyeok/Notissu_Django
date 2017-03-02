@@ -10,7 +10,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'notissu_django.settings')
 from django.conf import settings  # noqa
 from celery.schedules import crontab
 
-broker_url = 'amqp://guest@192.168.37.140:5672//'
+broker_url = 'amqp://guest@localhost:5672//'
 
 app = Celery('notissu_django', broker=broker_url)
 
