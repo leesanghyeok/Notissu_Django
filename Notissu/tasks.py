@@ -20,11 +20,13 @@ FIREBASE_MESSAGE_SEND_URL = "https://fcm.googleapis.com/fcm/send"
 def crawling_push():
     keyword_list = get_keyword()
     category = ['도서관', '학사', '장학', '국제교류', '외국인유학생', '모집·채용', '교내행사', '교외행사', '봉사']
-    notice_list = fetch_notice(category, 1, 5)
+    notice_list = fetch_notice(category, 1, 1)
     unduplicated_list = check_duplicate(notice_list)
     contain_keyword = get_contain_keyword(unduplicated_list, keyword_list)
     push_message(contain_keyword)
     insert_notice(unduplicated_list)
+    for notice, files in unduplicated_list:
+        print(notice.title)
     return "ok"
 
 
