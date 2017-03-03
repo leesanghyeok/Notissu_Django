@@ -27,7 +27,7 @@ CATEGORY_LIST = {
 
 def get_list(request, category, page):
     is_contain = 0
-    for key, value in CATEGORY_LIST.iteritems():
+    for key, value in CATEGORY_LIST.items():
         if category == key:
             is_contain = 1
             break
