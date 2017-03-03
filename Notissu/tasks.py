@@ -1,8 +1,7 @@
-import json
-
 import requests
 from bs4 import BeautifulSoup
 from celery import shared_task
+from pyfcm import FCMNotification
 
 from Notissu.models import Keyword
 from Notissu.models import Notice
@@ -14,6 +13,7 @@ LIBRARY_LIST_URL = "http://oasis.ssu.ac.kr/bbs/Bbs.ax?bbsID=1&pageSize=10&page=%
 NOTICE_VIEW_URL = "http://m.ssu.ac.kr/html/themes/m/html/notice_univ_view.jsp?messageId=%s&sCategory=%s"
 LIBRARY_VIEW_URL = "https://oasis.ssu.ac.kr/bbs/Detail.ax?bbsID=1&articleID=%s"
 FIREBASE_MESSAGE_SEND_URL = "https://fcm.googleapis.com/fcm/send"
+API_KEY = "AAAAKni3MTU:APA91bFv18y_shYTMxmKi8YZ1Rc2FLm8FolnWkb6PKoO2pLleh7fM343m3gCd5BfPy-b3mzwzvUvUwfoxnrQp-D83wYHi-BwQcj2V2dJsWYO71ROmBmpjhuKAZT6fe7paLbyDPPQK1U9"
 
 
 @shared_task
@@ -59,21 +59,10 @@ def get_contain_keyword(unduplicated_list, keyword_list):
 
 
 def push_message(contain_keyword):
-    header = {
-        "Content-Type": "application/json",
-        "Authorization": "key=AAAAKni3MTU:APA91bFv18y_shYTMxmKi8YZ1Rc2FLm8FolnWkb6PKoO2pLleh7fM343m3gCd5BfPy-b3mzwzvUvUwfoxnrQp-D83wYHi-BwQcj2V2dJsWYO71ROmBmpjhuKAZT6fe7paLbyDPPQK1U9",
-    }
-
+    push_service = FCMNotification(api_key=API_KEY)
     for keyword_dict in contain_keyword:
         hash = keyword_dict['hash']
-        data = {
-            "to": "/topics/" + hash,
-            "data": {
-                "message": "구독한 공지사항이 올라왔습니다.",
-            }
-        }
-        json_data = json.dumps(data)
-        list_response = requests.post(FIREBASE_MESSAGE_SEND_URL, headers=header, data=json_data)
+        push_service.notify_topic_subscribers(message_body="구독한 공지사항이 올라왔습니다.", topic_name=hash)
 
 
 def get_notice_id(tag, start_delimiter, end_delimiter):
