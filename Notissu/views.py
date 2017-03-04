@@ -34,26 +34,33 @@ def get_list(request, category, page):
     if is_contain == 0:
         return wrong_request()
 
-    page = int(page)
-    start_index = (page - 1) * RETURN_COUNT
-    end_index = start_index + RETURN_COUNT
-
     if category == 'all':
         db_notice_list = Notice.objects.all()
     else:
         db_notice_list = Notice.objects.filter(category=CATEGORY_LIST[category])
 
+    return get_notice_list_return(db_notice_list, page)
+
+
+def search_list(request, keyword, page):
+    db_notice_list = Notice.objects.filter(title__contains=keyword)
+
+    return get_notice_list_return(db_notice_list, page)
+
+
+def get_notice_list_return(db_notice_list, page):
+    page = int(page)
+    start_index = (page - 1) * RETURN_COUNT
+    end_index = start_index + RETURN_COUNT
     db_notice_list = db_notice_list.order_by('-date')[
                      start_index:end_index].values()
     if db_notice_list.count() <= 0:
         return wrong_request()
-
     return_list = []
     for dict in db_notice_list:
         del dict['contents']
         del dict['category']
         return_list.append(dict)
-
     return response_json(return_list)
 
 
@@ -165,6 +172,7 @@ def response_add():
 
 def response_fail():
     return response_crud("FAIL")
+
 
 def response_update():
     return response_crud("UPDATE")
