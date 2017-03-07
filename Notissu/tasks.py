@@ -25,9 +25,10 @@ def crawling_push():
     contain_keyword = get_contain_keyword(unduplicated_list, keyword_list)
     push_message(contain_keyword)
     insert_notice(unduplicated_list)
+    return_str = []
     for notice, files in unduplicated_list:
-        print(notice.title)
-    return "ok"
+        return_str.append(notice.title)
+    return return_str
 
 
 def get_keyword():
