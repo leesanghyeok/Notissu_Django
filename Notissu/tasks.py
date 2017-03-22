@@ -78,6 +78,7 @@ def get_notice_id(tag, start_delimiter, end_delimiter):
 
 def get_contents(soup, tag_name, tag_class, replace_old, replace_new):
     contents = soup.find(tag_name, class_=tag_class)
+    contents = max3bytes(str(contents))
     return str(contents).replace(replace_old, replace_new)
 
 
@@ -189,6 +190,5 @@ def is_duplicate(id):
     else:
         return 0
 
-# def get_keyword():
-#     request_header = {"Authorization": "key=" + AUTHORIZATION_KEY}
-#     print list_response.content
+def max3bytes(unicode_string):
+    return u''.join(uc if uc <= u'\uffff' else u'\ufffd' for uc in unicode_string)
